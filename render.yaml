@@ -1,0 +1,29 @@
+# Render blueprint for the Vtechiee SaaS migration.
+# This deliberately fails closed until the tenant-aware API migration is complete.
+services:
+  - type: web
+    name: vtechiee-gst-billing
+    runtime: node
+    plan: starter
+    branch: cloud-saas
+    buildCommand: npm ci && npm run build
+    startCommand: npm run server
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: HOST
+        value: 0.0.0.0
+      - key: SAAS_AUTH_ENABLED
+        value: "false"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: vtechiee-gst-postgres
+          property: connectionString
+      - key: SESSION_SECRET
+        generateValue: true
+databases:
+  - name: vtechiee-gst-postgres
+    plan: basic-256mb
+    databaseName: vtechiee_gst
+    user: vtechiee_gst
